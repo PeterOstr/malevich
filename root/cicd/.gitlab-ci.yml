@@ -1,0 +1,19 @@
+image: google/cloud-sdk:alpine
+
+deploy_staging:
+  stage: deploy
+  environment: staging
+  only:
+    - main
+  script:
+    - echo $ARTIFACT_REPO
+    - echo $gcp_project_name
+    - cp $gcp_project_key  /tmp/serivce-acct.json #Used for auth.
+    - gcloud auth activate-service-account --key-file=/tmp/serivce-acct.json
+    - gcloud config set project $gcp_project_name
+    - gcloud builds submit  --config=cloudbuild.yaml --substitutions=_PROJECT_ID=$gcp_project_name,_ARTIFACT_REPO=$ARTIFACT_REPO,_ENV_IMG_NAME=$ENV_IMG_NAME,_ENV=$ENV,_SERVICE_NAME=$SERVICE_NAME .
+  variables:
+    ENV_IMG_NAME: "api"
+    ENV: "pollock"
+    ARTIFACT_REPO: "pollock"
+    SERVICE_NAME: "api"
