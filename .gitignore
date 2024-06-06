@@ -11,3 +11,4 @@ catboost_info
 back/catboost_model.bin
 mlruns
 access
+mlartifacts

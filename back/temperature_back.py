@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 import requests
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+from requests.auth import HTTPBasicAuth
 
 app = FastAPI()
 
@@ -25,7 +26,7 @@ class WeatherData(BaseModel):
     Visibility_km: float
 
 @app.get("/weatherdata/", response_model=List[WeatherData])
-def get_weatherdata():
+def get_weatherdata(limit: Optional[int] = Query(None, description="Limit the number of returned records")):
     query = """
     SELECT 
         Localtime, 
@@ -37,8 +38,11 @@ def get_weatherdata():
         Cloud, 
         Visibility_km 
     FROM WeatherData
-    FORMAT TSV
     """
+    if limit:
+        query += f" ORDER BY Localtime DESC LIMIT {limit}"
+    query += " FORMAT TSV"
+
     url = f"http://{clickhouse_config['host']}:{clickhouse_config['port']}/"
     params = {
         'user': clickhouse_config['user'],
@@ -69,6 +73,53 @@ def get_weatherdata():
     ) for row in result]
 
     return weather_data
+
+class WeatherComparison(BaseModel):
+    Localtime: str
+    Temperature_C: float
+    Temperature_xgb_C: float
+    Temperature_catb_C: float
+
+@app.get("/weathercomparison/", response_model=List[WeatherComparison])
+def get_weathercomparison(limit: Optional[int] = Query(None, description="Limit the number of returned records")):
+    query = """
+    SELECT 
+        Localtime, 
+        Temperature_fact_C, 
+        Temperature_xgb_C,
+        Temperature_catb_C
+    FROM first_database.WeatherComparsion
+    """
+    if limit:
+        query += f" ORDER BY Localtime DESC LIMIT {limit}"
+    query += " FORMAT TSV"
+
+    url = f"http://{clickhouse_config['host']}:{clickhouse_config['port']}/"
+    params = {
+        'user': clickhouse_config['user'],
+        'password': clickhouse_config['password'],
+        'database': clickhouse_config['database'],
+        'query': query
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        result = response.text.splitlines()
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Data not found")
+
+    weather_comparison_data = [WeatherComparison(
+        Localtime=row.split('\t')[0],
+        Temperature_C=float(row.split('\t')[1]),
+        Temperature_xgb_C=float(row.split('\t')[2]),
+        Temperature_catb_C=float(row.split('\t')[3])
+    ) for row in result]
+
+    return weather_comparison_data
 
 @app.get("/")
 def read_root():
