@@ -9,6 +9,8 @@ steps:
         ".",
       ]
     # push the container image
+
+
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
@@ -30,7 +32,7 @@ steps:
         "managed",
         "--allow-unauthenticated",
         "--port",
-        "8000"
+        "8080"
       ]
 options:
   logging: CLOUD_LOGGING_ONLY
