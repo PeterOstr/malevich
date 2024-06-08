@@ -19,7 +19,7 @@ class Date_for_prediction_data(BaseModel):
     #index: List
     date: List
 
-# models
+#  models
 model_xgb_t = joblib.load('my_xgb_model.joblib')
 model_catb_t = joblib.load('my_catb_model.joblib')
 
