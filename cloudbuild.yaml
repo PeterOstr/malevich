@@ -6,7 +6,7 @@ steps:
         "build",
         "-t",
         "europe-central2-docker.pkg.dev/$_PROJECT_ID/$_ARTIFACT_REPO/$_ENV_IMG_NAME:$_ENV",
-        ".",
+        "./back",
       ]
     # push the container image
 
