@@ -6,6 +6,7 @@ deploy_staging:
   only:
     - main
   script:
+    - echo $gcp_project_name
     - cp $gcp_project_key  /tmp/serivce-acct.json #Used for auth.
     - gcloud auth activate-service-account --key-file=/tmp/serivce-acct.json
     - gcloud config set project $gcp_project_name
