@@ -14,7 +14,7 @@ deploy_staging:
     # --config=cloudbuild.yaml - here we define path to file
   variables:
     ENV_IMG_NAME: "weatherimage"
-    ENV: "01"
+    ENV: "02"
     ARTIFACT_REPO: "weatherpred"
     SERVICE_NAME: "weatherimage"
     # SERVICE_NAME - name of the cloud run
