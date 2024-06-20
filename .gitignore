@@ -4,9 +4,7 @@ swagger_client.egg-info
 data
 lstm_model.h5
 model1.h5
-back/my_xgb_model.joblib
 catboost_info
-back/my_catb_model.joblib
 catboost_info
 catboost_model.bin
 mlruns
