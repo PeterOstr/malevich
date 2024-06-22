@@ -17,4 +17,5 @@ deploy_staging:
     ENV: "02"
     ARTIFACT_REPO: "weatherpred"
     SERVICE_NAME: "weatherimage"
+    REGION: "europe-central2"
     # SERVICE_NAME - name of the cloud run
