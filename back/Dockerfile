@@ -6,7 +6,13 @@ USER root
 RUN apt-get update && apt-get install -y \
     cmake \
     build-essential \
-    libgomp1
+    libgomp1 \
+    git \
+    wget \
+    curl \
+    vim \
+    unzip \
+    libomp-dev
 
 COPY model_predict.py .
 COPY my_xgb_model.joblib .
