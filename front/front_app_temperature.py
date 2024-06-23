@@ -4,17 +4,24 @@ import requests
 from requests.auth import HTTPBasicAuth
 import networkx as nx
 import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
 
-# Заголовок и описание
-st.title("Weather Data Dashboard")
-st.write("This dashboard displays weather data retrieved from a ClickHouse database.")
+
+# URL переменные local/url
+
+#url_clilckhouse= ('https://weatherimage-ma4ayonvha-lm.a.run.app')
+url_clilckhouse = 'http://localhost:8000'
+
+# url_airflow = '34.118.108.23'
+# url_airflow = 'http://localhost:8090'
+
 
 # Функция для получения данных из API
 def fetch_weather_data(limit=None):
     params = {}
     if limit:
         params['limit'] = limit
-    response = requests.get("http://localhost:8000/weatherdata/", params=params)
+    response = requests.get(f"{url_clilckhouse}/weatherdata/", params=params)
     if response.status_code != 200:
         st.error("Failed to fetch data from the server.")
         return []
@@ -24,7 +31,7 @@ def fetch_weather_data_comparison(limit=None):
     params = {}
     if limit:
         params['limit'] = limit
-    response = requests.get("http://localhost:8000/weathercomparison/", params=params)
+    response = requests.get("https://weatherimage-ma4ayonvha-lm.a.run.app/weathercomparison/", params=params)
     if response.status_code != 200:
         st.error("Failed to fetch data from the server.")
         return []
@@ -82,59 +89,95 @@ def draw_dag(dag_id, tasks):
     plt.title(f"Graph for DAG: {dag_id}")
     plt.show()
 
-# Получение данных
-limit = st.sidebar.number_input("Limit records", min_value=1, max_value=1000, value=10, step=1)
-data = fetch_weather_data(limit=limit)
-data_comparison = fetch_weather_data_comparison(limit=limit)
+# Основная функция для страницы данных погоды
+def weather_data_page():
+    st.title("Weather Data Dashboard")
+    st.write("This dashboard displays weather data retrieved from a ClickHouse database.")
 
-# Преобразование данных в DataFrame
-df = pd.DataFrame(data)
-df_comparison = pd.DataFrame(data_comparison)
+    # Получение данных
+    limit = st.sidebar.number_input("Limit records", min_value=1, max_value=1000, value=10, step=1)
+    data = fetch_weather_data(limit=limit)
+    # data_comparison = fetch_weather_data_comparison(limit=limit)
 
-# Отображение данных в виде таблицы
-st.write("### Weather Data Table")
-st.dataframe(df)
+    # Преобразование данных в DataFrame
+    df = pd.DataFrame(data)
+    # df = pd.read_json(data, orient='split')
+    # df_comparison = pd.DataFrame(data_comparison)
 
-st.write("### Weather Data Table Comparison")
-st.dataframe(df_comparison)
+    # Отображение данных в виде таблицы
+    st.write("### Weather Data Table")
+    st.dataframe(df)
 
-# Ввод учетных данных для Airflow
-st.sidebar.title("Airflow Credentials")
-username = st.sidebar.text_input("Username", value="airflow")
-password = st.sidebar.text_input("Password", value="airflow", type="password")
+    st.write("### Weather Data Table Comparison")
+    # st.dataframe(df_comparison)
 
-# Получение списка DAG из Airflow
-dags = get_airflow_dags(username, password)
-selected_dag = st.sidebar.selectbox("Select a DAG to trigger and view", dags)
+# Основная функция для страницы Airflow
+def airflow_page():
+    st.title("Airflow DAGs Dashboard")
 
-# Кнопка для запуска DAG в Airflow
-if st.button("Trigger Selected Airflow DAG"):
-    if selected_dag:
-        status_code, response = trigger_airflow_dag(selected_dag, username, password)
-        if status_code == 200:
-            st.success(f"DAG {selected_dag} was triggered successfully.")
+    # Ввод учетных данных для Airflow
+    st.sidebar.title("Airflow Credentials")
+    username = st.sidebar.text_input("Username", value="airflow")
+    password = st.sidebar.text_input("Password", value="airflow", type="password")
+
+    # Получение списка DAG из Airflow
+    dags = get_airflow_dags(username, password)
+    selected_dag = st.sidebar.selectbox("Select a DAG to trigger and view", dags)
+
+    # Кнопка для запуска DAG в Airflow
+    if st.button("Trigger Selected Airflow DAG"):
+        if selected_dag:
+            status_code, response = trigger_airflow_dag(selected_dag, username, password)
+            if status_code == 200:
+                st.success(f"DAG {selected_dag} was triggered successfully.")
+            else:
+                st.error(f"Failed to trigger DAG {selected_dag}. Response: {response}")
         else:
-            st.error(f"Failed to trigger DAG {selected_dag}. Response: {response}")
-    else:
-        st.warning("Please select a DAG to trigger.")
+            st.warning("Please select a DAG to trigger.")
 
-# Получение и отображение структуры DAG
-if selected_dag:
-    st.write(f"### DAG Structure for {selected_dag}")
-    tasks = get_dag_structure(selected_dag, username, password)
-    if tasks:
-        draw_dag(selected_dag, tasks)
+    # Получение и отображение структуры DAG
+    if selected_dag:
+        st.write(f"### DAG Structure for {selected_dag}")
+        tasks = get_dag_structure(selected_dag, username, password)
+        if tasks:
+            draw_dag(selected_dag, tasks)
 
-# Дополнительная информация и ссылки
-st.sidebar.title("About")
-st.sidebar.info(
-    """
-    This app displays weather data from a ClickHouse database.
-    """
-)
+# Основная функция для страницы профилирования данных
+def profiling_page():
+    st.title("Data Profiling Report")
+    st.write("This page displays the data profiling report generated by ydata-profiling.")
 
-st.sidebar.info("Feel free to contact me\n"
-                "[My GitHub](https://github.com/PeterOstr)\n"
-                "[My Linkedin](https://www.linkedin.com/in/ostrikpeter/)\n"
-                "[Or just text me in Telegram](https://t.me/Politejohn)\n"
-                ".")
+    # Чтение HTML файла и отображение его содержимого
+    with open("data_profile_report.html", "r", encoding='utf-8') as f:
+        html_content = f.read()
+
+    components.html(html_content, height=800, scrolling=True)
+
+# Основная функция приложения
+def main():
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Weather Data", "Airflow DAGs", "Profiling Report"])
+
+    if page == "Weather Data":
+        weather_data_page()
+    elif page == "Airflow DAGs":
+        airflow_page()
+    elif page == "Profiling Report":
+        profiling_page()
+
+    # Дополнительная информация и ссылки
+    st.sidebar.title("About")
+    st.sidebar.info(
+        """
+        This app displays weather data from a ClickHouse database.
+        """
+    )
+
+    st.sidebar.info("Feel free to contact me\n"
+                    "[My GitHub](https://github.com/PeterOstr)\n"
+                    "[My Linkedin](https://www.linkedin.com/in/ostrikpeter/)\n"
+                    "[Or just text me in Telegram](https://t.me/Politejohn)\n"
+                    ".")
+
+if __name__ == "__main__":
+    main()
