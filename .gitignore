@@ -10,3 +10,4 @@ catboost_model.bin
 mlruns
 access
 mlartifacts
+clickhouse_sql
