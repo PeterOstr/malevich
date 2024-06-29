@@ -11,7 +11,6 @@ deploy_staging:
     - gcloud auth activate-service-account --key-file=/tmp/serivce-acct.json
     - gcloud config set project $gcp_project_name
     - gcloud builds submit --config=cloudbuild.yaml --substitutions=_PROJECT_ID=$gcp_project_name,_ARTIFACT_REPO=$ARTIFACT_REPO,_ENV_IMG_NAME=$ENV_IMG_NAME,_ENV=$ENV,_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION .
-    # --config=cloudbuild.yaml - here we define path to file
   variables:
     ENV_IMG_NAME: "weatherimage"
     ENV: "02"
@@ -19,3 +18,4 @@ deploy_staging:
     SERVICE_NAME: "weatherimage"
     REGION: "europe-central2"
     # SERVICE_NAME - name of the cloud run
+    # --config=cloudbuild.yaml - here we define path to file
