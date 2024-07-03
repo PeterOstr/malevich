@@ -16,7 +16,7 @@ deploy_staging:
     - echo "Setting project to $gcp_project_name"
     - gcloud config set project $gcp_project_name
     - echo "Submitting build..."
-    - gcloud builds submit --config=cloudbuild.yaml --substitutions=_PROJECT_ID=$gcp_project_name,_ARTIFACT_REPO=$ARTIFACT_REPO,_ENV_IMG_NAME=$ENV_IMG_NAME,_ENV=$ENV,_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION .
+    - gcloud builds submit --config=cloudbuild.yaml --substitutions=_PROJECT_ID=$gcp_project_name,_ARTIFACT_REPO=$ARTIFACT_REPO,_ENV_IMG_NAME=$ENV_IMG_NAME,_ENV=$ENV,_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION "."
   variables:
     ENV_IMG_NAME: "weatherimage"
     ENV: "02"
