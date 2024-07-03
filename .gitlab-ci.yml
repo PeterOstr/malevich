@@ -6,7 +6,7 @@ deploy_staging:
   only:
     - main
   script:
-    - echo "GCP Project Name: ${gcp_project_name}"
+    - echo $gcp_project_name
     - echo "Copying GCP Project Key to /tmp/service-acct.json"
     - cp $gcp_project_key /tmp/service-acct.json # Used for auth.
     - echo "Contents of /tmp/service-acct.json:"
