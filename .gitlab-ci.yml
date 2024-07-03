@@ -24,4 +24,4 @@ deploy_staging:
     SERVICE_NAME: "weatherimage"
     REGION: "europe-central2"
     # SERVICE_NAME - name of the cloud run
-    # --config=cloudbuild.yaml - here we define path to file
+    # --config=cloudbuild.yaml - here we define path to  file
