@@ -6,16 +6,10 @@ deploy_staging:
   only:
     - main
   script:
-    - echo "GCP Project Name: $gcp_project_name"
-    - echo "Copying GCP Project Key to /tmp/service-acct.json"
-    - cp $gcp_project_key /tmp/service-acct.json # Used for auth.
-    - echo "Contents of /tmp/service-acct.json:"
-    - cat /tmp/service-acct.json
-    - echo "Activating service account..."
+    - echo $gcp_project_name
+    - cp $gcp_project_key /tmp/service-acct.json #Used for auth.
     - gcloud auth activate-service-account --key-file=/tmp/service-acct.json
-    - echo "Setting project to $gcp_project_name"
     - gcloud config set project $gcp_project_name
-    - echo "Submitting build..."
     - gcloud builds submit --config=cloudbuild.yaml --substitutions=_PROJECT_ID=$gcp_project_name,_ARTIFACT_REPO=$ARTIFACT_REPO,_ENV_IMG_NAME=$ENV_IMG_NAME,_ENV=$ENV,_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION .
   variables:
     ENV_IMG_NAME: "weatherimage"
@@ -24,4 +18,4 @@ deploy_staging:
     SERVICE_NAME: "weatherimage"
     REGION: "europe-central2"
     # SERVICE_NAME - name of the cloud run
-    # --config=cloudbuild.yaml - here we define path to  file
+    # --config=cloudbuild.yaml - here we define path to file
