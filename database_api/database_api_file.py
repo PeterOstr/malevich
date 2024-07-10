@@ -57,6 +57,7 @@ async def weatherdata():
         """)
     model_prediction_df = df.toPandas().to_dict(orient='records')
 
+
     return model_prediction_df
 
 
